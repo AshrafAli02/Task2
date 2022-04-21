@@ -5,4 +5,9 @@ public class Color {
     public String ColorName;
     public double Amount;
 
+    @Override
+    public String toString() {
+        return this.ColorID + "\t" + this.ColorName + "\t" + this.Amount;
+    }
+
 }

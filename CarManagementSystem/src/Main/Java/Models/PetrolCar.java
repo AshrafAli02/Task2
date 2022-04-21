@@ -70,4 +70,10 @@ public class PetrolCar extends Car {
         return 0.00;
     }
 
+    @Override
+    public String toString() {
+        return "Car Name \t: " + this.carName + "\nCar Type \t:" + this.carType + "\nEngine Type \t: " + this.engineType
+                + "\nEngine Capacity \t:" + this.engineCapacity + "\nCompany Name \t:" + this.companyName;
+    }
+
 }

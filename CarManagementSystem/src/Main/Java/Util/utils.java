@@ -1,6 +1,7 @@
 package Main.Java.Util;
 
 import java.sql.*;
+import java.util.*;
 
 import Main.Java.DataModel.*;
 
@@ -205,4 +206,121 @@ public class utils {
 
     }
 
+    // Get the Color List
+    public static List<Color> GetColors() throws Exception {
+        List<Color> Colors = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select ColorID,ColorName,Amount from Color";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        Color color = new Color();
+                        color.ColorID = set.getString(1);
+                        color.ColorName = set.getString(2);
+                        color.Amount = set.getDouble(3);
+
+                        Colors.add(color);
+                    }
+                }
+                set.close();
+                sqlconn.close();
+            }
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+        return Colors;
+
+    }
+
+    public static List<CarType> GetCarTypes() throws Exception {
+        List<CarType> CarTypes = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select CarTypeID,TypeName,BasePrice,GST,CESS,RegistrationCharge,TransportCharge from CarType";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        CarType cartype = new CarType();
+                        cartype.CarTypeID = set.getString(1);
+                        cartype.CarTypeName = set.getString(2);
+                        cartype.BasePrice = set.getDouble(3);
+                        cartype.Gst = set.getDouble(4);
+                        cartype.CESS = set.getDouble(5);
+                        cartype.RegistrationCharge = set.getDouble(6);
+                        cartype.TransportCharge = set.getDouble(7);
+
+                        CarTypes.add(cartype);
+
+                    }
+
+                }
+            }
+            return CarTypes;
+
+        } catch (SQLException ex) {
+            throw new Exception(ex.getMessage());
+        }
+
+    }
+
+    public static List<EngineType> GetEngineTypes() throws Exception {
+        List<EngineType> EngineTypes = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select EngineTypeID,EngineTypeName,Capacity,Amount from EngineType";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        EngineType enginetype = new EngineType();
+                        enginetype.EngineTypeID = set.getString(1);
+                        enginetype.EngineTypeName = set.getString(2);
+                        enginetype.Capacity = set.getString(3);
+                        enginetype.Amount = set.getDouble(4);
+
+                        EngineTypes.add(enginetype);
+                    }
+                }
+                set.close();
+                sqlconn.close();
+            }
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+        return EngineTypes;
+    }
+
+    public static List<Company> GetCompanies() throws Exception {
+        List<Company> Companies = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select CompanyID,CompanyName from Company";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        Company company = new Company();
+                        company.CompanyID = set.getString(1);
+                        company.CompanyName = set.getString(2);
+
+                        Companies.add(company);
+                    }
+                }
+                set.close();
+                sqlconn.close();
+            }
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+        return Companies;
+    }
 }
