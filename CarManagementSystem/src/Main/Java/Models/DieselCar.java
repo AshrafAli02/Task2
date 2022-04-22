@@ -68,4 +68,11 @@ public class DieselCar extends Car {
     public double CalculatePrice() {
         return 0.00;
     }
+
+    @Override
+    public String toString() {
+        return "Car Name \t: " + this.carName + "\nCar Type \t:" + this.carType + "\nEngine Type \t: " + this.engineType
+                + "\nEngine Capacity \t:" + this.engineCapacity + "\nCompany Name \t:" + this.companyName
+                + "\nDescription \t: " + this.description;
+    }
 }

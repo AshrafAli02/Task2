@@ -17,4 +17,7 @@ public class CarDetails {
         this.Description = des;
     }
 
+    public CarDetails() {
+    }
+
 }
