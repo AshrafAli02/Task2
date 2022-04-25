@@ -267,4 +267,162 @@ public class CarUtil {
             throw new Exception(ex.getMessage());
         }
     }
+
+    public static List<CarDetails> GetCarDetails(String CompanyID, String EngineTypeID, String CarTypeID)
+            throws Exception {
+        List<CarDetails> carDetail = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select CarID,CarName,CompanyID,CarTypeID,EngineTypeID,Description from CarDetails where CompanyID='"
+                        + CompanyID + "' and EngineTypeID='" + EngineTypeID + "' and CarTypeID= '" + CarTypeID + "'";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        CarDetails Car = new CarDetails();
+                        Car.CarID = set.getString(1);
+                        Car.CarName = set.getString(2);
+                        Car.CompanyID = set.getString(3);
+                        Car.CarTypeID = set.getString(4);
+                        Car.EngineTypeID = set.getString(5);
+                        Car.Description = set.getString(6);
+
+                        carDetail.add(Car);
+                    }
+                }
+                set.close();
+                sqlconn.close();
+            }
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+
+        return carDetail;
+    }
+
+    public static List<CarDetails> GetCarDetails(String CompanyID, String CarTypeID) throws Exception {
+        List<CarDetails> carDetail = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select CarID,CarName,CompanyID,CarTypeID,EngineTypeID,Description from CarDetails where CompanyID='"
+                        + CompanyID + "' and CarTypeID='" + CarTypeID + "'";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        CarDetails Car = new CarDetails();
+                        Car.CarID = set.getString(1);
+                        Car.CarName = set.getString(2);
+                        Car.CompanyID = set.getString(3);
+                        Car.CarTypeID = set.getString(4);
+                        Car.EngineTypeID = set.getString(5);
+                        Car.Description = set.getString(6);
+
+                        carDetail.add(Car);
+                    }
+                }
+                set.close();
+                sqlconn.close();
+            }
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+        return carDetail;
+    }
+
+    public static List<CarDetails> GetCarDetails(String CompanyID) throws Exception {
+        List<CarDetails> carDetail = new ArrayList<>();
+        try {
+            Connection sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (sqlconn != null) {
+                Statement stat = sqlconn.createStatement();
+                String Query = "Select CarID,CarName,CompanyID,CarTypeID,EngineTypeID,Description from CarDetails where CompanyID='"
+                        + CompanyID + "'";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        CarDetails Car = new CarDetails();
+                        Car.CarID = set.getString(1);
+                        Car.CarName = set.getString(2);
+                        Car.CompanyID = set.getString(3);
+                        Car.CarTypeID = set.getString(4);
+                        Car.EngineTypeID = set.getString(5);
+                        Car.Description = set.getString(6);
+
+                        carDetail.add(Car);
+                    }
+                }
+                set.close();
+                sqlconn.close();
+            }
+
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage());
+        }
+        return carDetail;
+    }
+
+    public static Double GetTaxAmount(String CarID) throws Exception {
+        double tax = 0;
+        double BasePrice = 0, EnginePrice = 0, GST = 0, CESS = 0;
+        try {
+            Connection Sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (Sqlconn != null) {
+                Statement stat = Sqlconn.createStatement();
+                String Query = "Select CarType.BasePrice,CarType.GST,CarType.CESS,EngineType.Amount from CarType,EngineType,CarDetails where CarType.CarTypeID=CarDetails.CarTypeID and EngineType.EngineTypeID=CarDetails.EngineTypeID and CarDetails.CarID='"
+                        + CarID + "'";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        BasePrice = set.getDouble(1);
+                        GST = set.getDouble(2);
+                        CESS = set.getDouble(3);
+                        EnginePrice = set.getDouble(4);
+                    }
+                }
+                set.close();
+                Sqlconn.close();
+
+            }
+
+            double calGst = (BasePrice + EnginePrice) * (GST / 100);
+            double calcess = (BasePrice + EnginePrice) * (CESS / 100);
+            tax = calGst + calcess;
+
+        } catch (Exception ex) {
+            throw new Exception();
+        }
+
+        return tax;
+    }
+
+    public static Double GetCarPrice(String CarID) throws Exception {
+        double BasePrice = 0, EnginePrice = 0, regcharge = 0, trascharge = 0;
+        try {
+            Connection Sqlconn = DriverManager.getConnection(ConnectionString + DBName, UserName, Password);
+            if (Sqlconn != null) {
+                Statement stat = Sqlconn.createStatement();
+                String Query = "Select CarType.BasePrice,CarType.RegistrationCharge,CarType.TransportCharge,EngineType.Amount from CarType,EngineType,CarDetails where CarType.CarTypeID=CarDetails.CarTypeID and EngineType.EngineTypeID=CarDetails.EngineTypeID and CarDetails.CarID='"
+                        + CarID + "'";
+                ResultSet set = stat.executeQuery(Query);
+                if (set != null) {
+                    while (set.next()) {
+                        BasePrice = set.getDouble(1);
+                        regcharge = set.getDouble(2);
+                        trascharge = set.getDouble(3);
+                        EnginePrice = set.getDouble(2);
+                    }
+                }
+                set.close();
+                Sqlconn.close();
+            }
+        } catch (Exception ex) {
+            throw new Exception();
+        }
+        return (BasePrice + EnginePrice + regcharge + trascharge);
+    }
 }

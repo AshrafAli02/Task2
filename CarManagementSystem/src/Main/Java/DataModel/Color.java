@@ -7,7 +7,7 @@ public class Color {
 
     @Override
     public String toString() {
-        return this.ColorID + "\t" + this.ColorName + "\t" + this.Amount;
+        return "Color Name \t:" + this.ColorName + "\nColor Amount \t :" + this.Amount;
     }
 
 }

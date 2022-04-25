@@ -3,9 +3,8 @@ import java.io.*;
 import java.util.*;
 
 import Main.Java.DataModel.*;
-import Main.Java.Models.DieselCar;
-import Main.Java.Models.ElectricCar;
-import Main.Java.Models.PetrolCar;
+import Main.Java.Models.*;
+
 import Main.Java.Util.*;
 
 public class App {
@@ -14,15 +13,35 @@ public class App {
     public static List<CarType> CarTypes = new ArrayList<>();
     public static List<EngineType> EngineTypes = new ArrayList<>();
     public static List<Color> Colors = new ArrayList<>();
+    public static String User_Name = "";
 
     public static void main(String[] args) throws Exception {
         try {
-            int code = Login();
-            DashBoard(code);
+            InitialFunction();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
 
+    }
+
+    public static void InitialFunction() throws Exception {
+        System.out.println("Select Your Option");
+        System.out.println("-------------------");
+        System.out.println("1. Login");
+        System.out.println("2. Register");
+        System.out.print("Enter your Option : ");
+        int option = Integer.parseInt(reader.readLine());
+
+        if (option == 1) {
+            int code = Login();
+            DashBoard(code);
+        } else if (option == 2) {
+            Registration();
+            InitialFunction();
+        } else {
+            System.out.println("Enter Correct Option");
+            InitialFunction();
+        }
     }
 
     public static void DashBoard(int RoleCode) throws Exception {
@@ -37,7 +56,142 @@ public class App {
             EngineTypes = utils.GetEngineTypes();
             Colors = utils.GetColors();
             AdminActions();
+        } else if (RoleCode == 3) {
+            Companies = utils.GetCompanies();
+            CarTypes = utils.GetCarTypes();
+            EngineTypes = utils.GetEngineTypes();
+            Colors = utils.GetColors();
+            CustomerFuctions();
+
         }
+    }
+
+    public static void CustomerFuctions() throws Exception {
+
+        System.out.println("Select Company");
+        int SelCompany = SelectedCompany(Companies);
+        Company SelectedCompany = Companies.get(SelCompany - 1);
+        int SelCarType = SelectCarType(CarTypes);
+        CarType SelectedCarType = CarTypes.get(SelCarType - 1);
+        int SelEngineType = SelectEngineType(EngineTypes);
+        EngineType SelectedEngineType = EngineTypes.get(SelEngineType - 1);
+
+        List<CarDetails> cardetails = CarUtil.GetCarDetails(SelectedCompany.CompanyID, SelectedEngineType.EngineTypeID,
+                SelectedCarType.CarTypeID);
+
+        List<Car> cars = GetCarDatas(cardetails);
+
+        System.out.println("\n\n\nAvailable Cars");
+        int i = 0;
+        for (Car car : cars) {
+            System.out.println("--------------------------------------------------------");
+            System.out.println("Car NO : " + (++i));
+            System.out.println("--------------------------------------------------------");
+            System.out.println(car.toString());
+            System.out.println("The Price of the Car is\t : " + car.CalculatePrice());
+            System.out.println("--------------------------------------------------------");
+
+        }
+        System.out.print("Enter Car No You want to Purchase : ");
+        int option = Integer.parseInt(reader.readLine());
+        if (option <= i && option > 0) {
+            System.out.println("Available Car Colors");
+            Car selectedCar = cars.get(option - 1);
+            Double amt = selectedCar.CalculatePrice();
+            List<String> carcol = CarUtil.GetAvailableCaolors(cars.get(option - 1).GetCarID());
+            int j = 0;
+            List<Integer> avaind = new ArrayList<>();
+            for (Color col : Colors) {
+                ++j;
+                if (carcol.contains(col.ColorID)) {
+                    System.out.println(j + " . " + col.ColorName + "\t Total: " + (amt + col.Amount) + "\t");
+                    avaind.add(j);
+
+                }
+
+            }
+            System.out.print("Select Color : ");
+            int Coloption = Integer.parseInt(reader.readLine());
+            if (Coloption <= j && Coloption > 0 && avaind.contains(Coloption)) {
+                selectedCar.SetCarColor(Colors.get(Coloption - 1).ColorName);
+                Color selectedColor = Colors.get(Coloption - 1);
+
+                System.out.println("Are you Sure You want to Buy this Car");
+                System.out.print("If yes Type 'y'  : ");
+                String res = reader.readLine();
+                if (res.equalsIgnoreCase("y")) {
+                    boolean isUser = UserUtil.IsUser(User_Name);
+                    if (!isUser) {
+                        System.out.println("Customer details Not Found Please Enter the Details");
+                        CustomerDetails customer = GetCustomerDetails();
+                        String CID = UserUtil.AddCustomerDetails(customer);
+
+                        System.out.println("Customer Added SuccessFully");
+                        Invoice invoice = new Invoice(selectedCar.GetCarID(), selectedColor.ColorID,
+                                selectedCar.GetPrice(), selectedCar.GetTaxAmount(), selectedColor.Amount, CID);
+                        InvoiceUtil.AddInvoice(invoice);
+                        System.out.println("invoice generated SuccessFully");
+                        GenerateInvoice(invoice);
+
+                    } else {
+                        String CID = UserUtil.GetCustomerID(User_Name);
+                        Invoice invoice = new Invoice(selectedCar.GetCarID(), selectedColor.ColorID,
+                                selectedCar.GetPrice(), selectedCar.GetTaxAmount(), selectedColor.Amount, CID);
+                        InvoiceUtil.AddInvoice(invoice);
+                        System.out.println(" invoice Generated SuccessFully");
+                        GenerateInvoice(invoice);
+
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    public static void Registration() throws Exception {
+        System.out.println("Welcome");
+        System.out.println("--------");
+        UserDetails user = new UserDetails();
+        System.out.print("Enter the User Name : ");
+        user.UserName = reader.readLine();
+        System.out.print("Enter the Password : ");
+        user.Password = reader.readLine();
+        System.out.print("Enter the Mobile Number : ");
+        user.MobileNumber = reader.readLine();
+        System.out.print("Enter the Email : ");
+        user.Email = reader.readLine();
+
+        UserUtil.AddUser(user);
+
+    }
+
+    public static void GenerateInvoice(Invoice invoice) throws Exception {
+        System.out.println("----------------------------------------------------------------");
+        System.out.println("Invoice Detail");
+        System.out.println("----------------------------------------------------------------");
+        CarDetails cardetails = CarUtil.GetCarDetail(invoice.CarID);
+        EngineType enginetype = CarEngineType(cardetails.EngineTypeID);
+        CarType cartypee = CarType_Get(cardetails.CarTypeID);
+        Company company = Company_Get(cardetails.CompanyID);
+        Color col = GetColor(invoice.ColorID);
+        System.out.println("Car Name \t\t:" + cardetails.CarName);
+        System.out.println("Description \t\t:" + cardetails.Description);
+        System.out.println("Company \t\t:" + company.CompanyName);
+        System.out.println("Engine Details");
+        System.out.println(enginetype.toString());
+        System.out.println("Car Type Details");
+        System.out.println(cartypee.toString());
+        System.out.println("Car Color Details");
+        System.out.println(col.toString());
+        System.out.println("----------------------------------------------------------------");
+        System.out.println("Price                                           : " + invoice.Price);
+        System.out.println("TAx                                             : " + invoice.TaxAmount);
+        System.out.println("----------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------");
+        System.out.println("Price                                           : " + invoice.TotalAmount);
+        System.out.println("----------------------------------------------------------------");
+
     }
 
     // Super Admin Functions
@@ -428,18 +582,25 @@ public class App {
             String UName = reader.readLine();
             System.out.print("Enter your Password \t :");
             String Password = reader.readLine();
-            if (UName.toLowerCase().equals("superadmin") && Password.equals("SuperAdmin123")) {
-                return 1;
-            } else if (UName.toLowerCase().equals("admin") && Password.equals("Admin123")) {
-                return 2;
-            }
-            // user
-            else {
+            if (UName != null || Password != null) {
+                if (UName.toLowerCase().equals("superadmin") && Password.equals("SuperAdmin123")) {
+                    return 1;
+                } else if (UName.toLowerCase().equals("admin") && Password.equals("Admin123")) {
+                    return 2;
+                } else {
+                    boolean res = UserUtil.IsValidUser(UName, Password);
+                    if (res) {
+                        User_Name = UName;
+                        return 3;
+                    }
+                }
+            } else {
                 throw new Exception("User Name and Password Incorrect");
             }
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
+        return 0;
 
     }
 
@@ -566,7 +727,7 @@ public class App {
                 System.out.println("Current Details of Car");
                 System.out.println(petrolcar.toString());
                 System.out.println("you want to change the Company details");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt1 = reader.readLine();
                 if (opt1.equalsIgnoreCase("y")) {
                     int selCompany = SelectedCompany(Companies);
@@ -575,7 +736,7 @@ public class App {
                     petrolcar.SetCompanyName(carcompany.CompanyName);
                 }
                 System.out.println("you want to change the Car Type ");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt2 = reader.readLine();
                 if (opt2.equalsIgnoreCase("y")) {
                     int selcartype = SelectCarType(CarTypes);
@@ -584,7 +745,7 @@ public class App {
                     petrolcar.setCarType(cartype.CarTypeName);
                 }
                 System.out.println("you want to change the Car Engine Type ");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt3 = reader.readLine();
                 if (opt3.equalsIgnoreCase("y")) {
                     int selenginetype = SelectEngineType(EngineTypes);
@@ -594,7 +755,7 @@ public class App {
                     petrolcar.SetEngineCapacity(enginetype.Capacity);
                 }
                 System.out.println("you want to change the Car Name ");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt4 = reader.readLine();
                 if (opt4.equalsIgnoreCase("y")) {
                     System.out.print("Enter new Car Name : ");
@@ -619,7 +780,7 @@ public class App {
                 System.out.println("Current Details of Car");
                 System.out.println(dieselcar.toString());
                 System.out.println("you want to change the Company details");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt1 = reader.readLine();
                 if (opt1.equalsIgnoreCase("y")) {
                     int selCompany = SelectedCompany(Companies);
@@ -628,7 +789,7 @@ public class App {
                     dieselcar.SetCompanyName(carcompany.CompanyName);
                 }
                 System.out.println("you want to change the Car Type ");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt2 = reader.readLine();
                 if (opt2.equalsIgnoreCase("y")) {
                     int selcartype = SelectCarType(CarTypes);
@@ -637,7 +798,7 @@ public class App {
                     dieselcar.setCarType(cartype.CarTypeName);
                 }
                 System.out.println("you want to change the Car Engine Type ");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt3 = reader.readLine();
                 if (opt3.equalsIgnoreCase("y")) {
                     int selenginetype = SelectEngineType(EngineTypes);
@@ -647,7 +808,7 @@ public class App {
                     dieselcar.SetEngineCapacity(enginetype.Capacity);
                 }
                 System.out.println("you want to change the Car Name ");
-                System.out.println("\n Please select  'y' - yes 'n'- No");
+                System.out.print("\nPlease select  'y' - yes 'n'- No : ");
                 String opt4 = reader.readLine();
                 if (opt4.equalsIgnoreCase("y")) {
                     System.out.print("Enter new Car Name : ");
@@ -701,5 +862,66 @@ public class App {
 
         }
         return company;
+    }
+
+    public static Color GetColor(String Colorid) {
+        for (Color col : Colors) {
+            if (col.ColorID.equals(Colorid)) {
+                return col;
+            }
+
+        }
+        return new Color();
+    }
+
+    public static List<Car> GetCarDatas(List<CarDetails> Cardetails) {
+        List<Car> cardata = new ArrayList<>();
+        for (CarDetails car : Cardetails) {
+            EngineType enginetype = CarEngineType(car.EngineTypeID);
+            CarType cartype = CarType_Get(car.CarTypeID);
+            Company carcompany = Company_Get(car.CompanyID);
+            if (enginetype.EngineTypeName.equalsIgnoreCase("Petrol")) {
+                PetrolCar ptcar = new PetrolCar(car.CarID, car.CarName, carcompany.CompanyName, cartype.CarTypeName,
+                        enginetype.EngineTypeName, car.Description, enginetype.Capacity);
+                cardata.add(ptcar);
+            } else if (enginetype.EngineTypeName.equalsIgnoreCase("diesel")) {
+                DieselCar descar = new DieselCar(car.CarID, car.CarName, carcompany.CompanyName, cartype.CarTypeName,
+                        enginetype.EngineTypeName, car.Description, enginetype.Capacity);
+                cardata.add(descar);
+            } else {
+                ElectricCar ev = new ElectricCar(car.CarID, car.CarName, carcompany.CompanyName, cartype.CarTypeName,
+                        enginetype.EngineTypeName, car.Description, enginetype.Capacity);
+                cardata.add(ev);
+            }
+
+        }
+        return cardata;
+    }
+
+    public static CustomerDetails GetCustomerDetails() throws Exception {
+        CustomerDetails customer = new CustomerDetails();
+        System.out.println("Enter the Customer Details");
+        System.out.println("--------------------------------------------------");
+        System.out.print("Enter the Name \t: ");
+        customer.SetCustomerName(reader.readLine());
+        System.out.print("Enter the Mobile NO \t: ");
+        customer.SetMobileNumber(reader.readLine());
+
+        Address address = new Address();
+        System.out.print("Enter Door No \t: ");
+        address.DoorNo = reader.readLine();
+        System.out.print("Enter Street Name \t: ");
+        address.StreetName = reader.readLine();
+        System.out.print("Enter City Name \t: ");
+        address.City = reader.readLine();
+        System.out.print("Enter District \t: ");
+        address.District = reader.readLine();
+        System.out.print("Enter State \t: ");
+        address.State = reader.readLine();
+        customer.SetAddress(address);
+        customer.SetUserName(User_Name);
+
+        return customer;
+
     }
 }

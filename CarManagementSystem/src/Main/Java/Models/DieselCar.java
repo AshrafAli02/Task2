@@ -1,9 +1,23 @@
 package Main.Java.Models;
 
+import Main.Java.Util.CarUtil;
+
 public class DieselCar extends Car {
-    private String engineType;
-    private String engineCapacity;
-    private String carType;
+
+    public DieselCar(String CarID, String CarName, String CompanyName, String CarType, String EngineType,
+            String Description, String EngineCapacity) {
+        this.carID = CarID;
+        this.carName = CarName;
+        this.companyName = CompanyName;
+        this.carType = CarType;
+        this.engineType = EngineType;
+        this.description = Description;
+        this.engineCapacity = EngineCapacity;
+
+    }
+
+    public DieselCar() {
+    }
 
     public String GetCarID() {
         return this.carID;
@@ -65,14 +79,30 @@ public class DieselCar extends Car {
         return this.carType;
     }
 
-    public double CalculatePrice() {
-        return 0.00;
+    public double CalculatePrice() throws Exception {
+        double tax = CarUtil.GetTaxAmount(this.carID);
+        this.Taxamount = tax;
+        double Price = CarUtil.GetCarPrice(this.carID);
+        this.Price = Price;
+
+        return tax + Price;
+    }
+
+    public double GetTaxAmount() {
+
+        return this.Taxamount;
+    }
+
+    public double GetPrice() {
+
+        return this.Price;
     }
 
     @Override
     public String toString() {
         return "Car Name \t: " + this.carName + "\nCar Type \t:" + this.carType + "\nEngine Type \t: " + this.engineType
-                + "\nEngine Capacity \t:" + this.engineCapacity + "\nCompany Name \t:" + this.companyName
+                + "\nEngine Capacity :" + this.engineCapacity + "\nCompany Name \t:" + this.companyName
                 + "\nDescription \t: " + this.description;
     }
+
 }

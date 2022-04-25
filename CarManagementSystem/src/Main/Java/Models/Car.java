@@ -6,6 +6,11 @@ public abstract class Car {
     String companyName;
     String carColor;
     String description;
+    String engineType;
+    String engineCapacity;
+    String carType;
+    double Price;
+    double Taxamount;
 
     public abstract String GetCarID();
 
@@ -24,4 +29,10 @@ public abstract class Car {
     public abstract void SetDescription(String Description);
 
     public abstract String GetDescription();
+
+    public abstract double CalculatePrice() throws Exception;
+
+    public abstract double GetTaxAmount();
+
+    public abstract double GetPrice();
 }
